@@ -1,24 +1,30 @@
 import os
 from telegram import Bot
+import asyncio
 
-def sendMessage(data):
-    tg_bot = Bot(token=os.environ['TOKEN'])
-    channel = os.environ['CHANNEL']
+# Initialisation du bot Telegram
+TOKEN = os.environ.get('TOKEN')
+CHANNEL = os.environ.get('CHANNEL')
+
+if not TOKEN or not CHANNEL:
+    print("[X] Erreur: TOKEN et CHANNEL doivent être définis")
+    exit(1)
+
+bot = Bot(token=TOKEN)
+
+def sendMessage(text):
+    """Envoie un message texte sur Telegram"""
     try:
-        print('--->Sending message to telegram')
-        tg_bot.sendMessage(
-            channel,
-            data,
-            parse_mode="MARKDOWN",
-        )
+        print(f"[I] Envoi à Telegram: {text[:50]}...")
+        
+        # Créer une boucle asyncio pour envoyer le message
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(bot.send_message(chat_id=CHANNEL, text=text))
+        loop.close()
+        
+        print("[I] Message envoyé avec succès")
         return True
-    except KeyError:
-        print('--->Key error - sending error to telegram')
-        tg_bot.sendMessage(
-            channel,
-            data,
-            parse_mode="MARKDOWN",
-        )
     except Exception as e:
-        print("[X] Telegram Error:\n>", e)
-    return False
+        print(f"[X] Erreur d'envoi Telegram: {e}")
+        return False
