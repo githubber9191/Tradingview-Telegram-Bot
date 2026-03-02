@@ -1,0 +1,10 @@
+echo "flask>=2.0.0" > requirements.txt
+echo "python-telegram-bot>=13.0" >> requirements.txt
+echo "pandas>=1.3.0" >> requirements.txt
+echo "tabulate>=0.8.9" >> requirements.txt
+echo "requests>=2.26.0" >> requirements.txt
+echo "selenium>=4.0.0" >> requirements.txt
+echo "pillow>=8.0.0" >> requirements.txt
+git add requirements.txt
+git commit -m "Add requirements.txt"
+git push
