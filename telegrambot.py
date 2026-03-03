@@ -1,7 +1,8 @@
 import os
-from telegram import Bot
 import asyncio
 import logging
+from telegram import Bot
+from telegram.error import TelegramError
 
 logger = logging.getLogger(__name__)
 
@@ -14,29 +15,28 @@ if not TOKEN or not CHANNEL:
 
 bot = Bot(token=TOKEN)
 
+async def send_async(text):
+    """Fonction asynchrone interne"""
+    return await bot.send_message(chat_id=CHANNEL, text=text)
+
 def sendMessage(text):
-    """Envoie un message et retourne True/False selon le résultat"""
+    """Wrapper synchrone pour Flask"""
     try:
         logger.info(f"Tentative d'envoi: {text[:50]}...")
         
-        # Créer une boucle asyncio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-        # Envoyer et attendre le résultat
-        result = loop.run_until_complete(bot.send_message(
-            chat_id=CHANNEL, 
-            text=text
-        ))
-        loop.close()
+        # asyncio.run() crée une nouvelle boucle et la ferme proprement
+        result = asyncio.run(send_async(text))
         
         if result and result.message_id:
             logger.info(f"✅ Message envoyé, ID: {result.message_id}")
             return True
         else:
-            logger.error("❌ Pas de message_id dans la réponse")
+            logger.error("❌ Pas de message_id")
             return False
             
+    except TelegramError as e:
+        logger.error(f"❌ Erreur Telegram: {e}")
+        return False
     except Exception as e:
-        logger.error(f"❌ Exception Telegram: {e}")
+        logger.error(f"❌ Exception: {e}")
         return False
